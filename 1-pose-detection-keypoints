@@ -1,0 +1,260 @@
+import os
+import warnings
+from argparse import ArgumentParser
+
+import cv2 
+import mmcv
+
+from mmpose.apis import (inference_bottom_up_pose_model, init_pose_model,
+                         vis_pose_result)
+from mmpose.datasets import DatasetInfo
+import numpy as np
+import torch
+import time
+
+from torch import nn
+from torch.nn import functional as F
+
+############################## Wyswietlanie: Ramka i napis 
+
+def detect(frame):
+    bounding_box_cordinates, weights =  HOGCV.detectMultiScale(frame, winStride = (4, 4), padding = (8, 8), scale = 0.5)
+
+    person = 1
+    for x,y,w,h in bounding_box_cordinates:
+        cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
+        cv2.putText(frame, f'person {person}', (x,y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1)
+        person += 1
+    
+    cv2.putText(frame, 'Status : Detecting ', (40,40), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255,0,0), 2)
+    cv2.putText(frame, f'Total Persons : {person-1}', (40,70), cv2.FONT_HERSHEY_DUPLEX, 0.8, (255,0,0), 2)
+    cv2.imshow('output', frame)
+
+    return frame
+######################### lista aktywnosci
+
+labels_map = [
+    "jogging/bieganie",
+    "waving/machanie",
+    "carrying/niesienie",
+    "bending/kucanie",
+    "skipping/podskoki-na-1-nodze",
+    "jacking/pajacyki",
+    "squat/przysiad"
+]
+
+def main():
+    """Visualize the demo images."""
+    parser = ArgumentParser()
+    parser.add_argument('pose_config', help='Config file for pose')
+    parser.add_argument('pose_checkpoint', help='Checkpoint file for pose')
+    parser.add_argument('--video-path', type=str, help='Video path')
+    parser.add_argument(
+        '--show',
+        action='store_true',
+        default=False,
+        help='whether to show visualizations.')
+    parser.add_argument(
+        '--out-video-root',
+        default='',
+        help='Root of the output video file. '
+        'Default not saving the visualization video.')
+    parser.add_argument(
+        '--device', default='cuda:0', help='Device used for inference')
+    parser.add_argument(
+        '--kpt-thr', type=float, default=0.3, help='Keypoint score threshold')
+    parser.add_argument(
+        '--pose-nms-thr',
+        type=float,
+        default=0.9,
+        help='OKS threshold for pose NMS')
+    parser.add_argument(
+        '--radius',
+        type=int,
+        default=4,
+        help='Keypoint radius for visualization')
+    parser.add_argument(
+        '--thickness',
+        type=int,
+        default=1,
+        help='Link thickness for visualization')
+
+    args = parser.parse_args()
+
+    assert args.show or (args.out_video_root != '')
+
+    # budowa modelu
+    pose_model = init_pose_model(
+        args.pose_config, args.pose_checkpoint, device=args.device.lower())
+
+        # siec 7 warstwowa 
+
+    class Model(nn.Module):
+
+        def __init__(self):
+            
+            super(Model, self).__init__()
+            
+            self.l1 = nn.Linear(480, 90) 
+            self.l2 = nn.Linear(90, 90)  
+            self.l3 = nn.Linear(90, 7)    
+
+            self.sigmoid = nn.Sigmoid()
+            self.softmax = nn.Softmax()
+            self.relu = nn.ReLU()
+            self.tanh = nn.Tanh()
+        def forward(self, x):
+            """
+            W funkcji forward akceptujemy zmienną danych wejściowych i musimy wrócić
+             za Zmienna danych wyjściowych. Możemy użyć modułów zdefiniowanych w konstruktorze 
+             jak również arbitralne operatory na zmiennych.
+            """
+            x = self.relu(self.l1(x))
+            x = self.relu(self.l2(x))
+            return self.l3(x)
+    #  model
+    model = Model()
+    #model.to(device)
+
+    import __main__
+    setattr(__main__, "Model", Model)
+
+    #ladowanie modelu do klasyfikacji poz
+    model.load_state_dict(torch.load('/home/asia/Desktop/opracowanie wynikow/przyklad-net-dane-diabetykow/PyTorch-1D-NN-Classifier-master/simple_ann_classifier_w_test/trained_model/trained_model.pt'))
+
+    dataset = pose_model.cfg.data['test']['type']
+    dataset_info = pose_model.cfg.data['test'].get('dataset_info', None)
+    if dataset_info is None:
+        warnings.warn(
+            'Please set `dataset_info` in the config.'
+            'Check https://github.com/open-mmlab/mmpose/pull/663 for details.',
+            DeprecationWarning)
+        assert (dataset == 'BottomUpCocoDataset')
+    else:
+        dataset_info = DatasetInfo(dataset_info)
+
+    # wczytanie wideo
+    video = mmcv.VideoReader(args.video_path)
+    assert video.opened, f'Faild to load video file {args.video_path}'
+
+    if args.out_video_root == '':
+        save_out_video = False
+    else:
+        os.makedirs(args.out_video_root, exist_ok=True)
+        save_out_video = True
+
+    if save_out_video:
+        fps = video.fps
+        size = (video.width, video.height)
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        videoWriter = cv2.VideoWriter(
+            os.path.join(args.out_video_root,
+                         f'vis_{os.path.basename(args.video_path)}'), fourcc,
+            fps, size)
+
+    # opcjonalnie
+    return_heatmap = False
+
+    # zwrot uzytej  funkcji
+    output_layer_names = None
+
+    with open('zadania.csv','w') as f:
+        f.writelines('')
+
+    classification_input=[] #wejscie do klasyfikaji  w odniesieniu do macierzy 480 klatek
+    classification_input_max_len = 480
+
+    current_label="unknown/nierozpoznano" # adnotacja w przypadku braku rozpoznania aktywnosci, pojawia sie zazwyczaj na samym poczatku, po chwili zamienia sie na opis rozpoznanej aktywnosci  
+
+    print('Running inference...')
+    for _, cur_frame in enumerate(mmcv.track_iter_progress(video)):
+        pose_results, _ = inference_bottom_up_pose_model(
+            pose_model,
+            cur_frame,
+            dataset=dataset,
+            dataset_info=dataset_info,
+            pose_nms_thr=args.pose_nms_thr,
+            return_heatmap=return_heatmap,
+            outputs=output_layer_names)
+            
+      
+        #wspolrzedne kazdej ramki macierz
+        wsp=pose_results[0]['keypoints']
+        
+        #min max
+        xmin=np.min(wsp[:,0])
+        xmax=np.max(wsp[:,0])
+        print('xmin',xmin,'xmax',xmax)
+
+        #ymax max
+        ymin=np.min(wsp[:,1])
+        ymax=np.max(wsp[:,1])
+        print('ymin',ymin,'ymax',ymax)
+
+        # show the results
+        vis_frame = vis_pose_result(
+            pose_model,
+            cur_frame,
+            pose_results,
+            radius=args.radius,
+            thickness=args.thickness,
+            dataset=dataset,
+            dataset_info=dataset_info,
+            kpt_score_thr=args.kpt_thr,
+            show=False)                       #wyswietlanie poj obrazow po klatce 
+
+
+        if save_out_video:
+            cv2.rectangle(vis_frame,(int (xmin),int(ymin)),(int(xmax),int(ymax)),(0,255,0),1)
+            cv2.putText(vis_frame, current_label, (int (xmin),int(ymin)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2, cv2.LINE_AA)
+            videoWriter.write(vis_frame)
+
+        #vis_frame2 = cv2.rectangle(vis_frame,(int (50),int(50)),(int(350),int(350)),(255,0,0),-1)
+
+        #if args.show:
+        cv2.imshow('Image', vis_frame)
+        #h, w, c = im.shape >> ksztalt SPR :macierzy heigh weigh wys szer i c to na rgb
+        h,w,c = vis_frame.shape 
+
+
+        print (wsp.shape) #np array wsp.shape {()}
+        #wr zmienna liczba wierszy w wsp + normalizacja tzn podzielone /w i /h
+        line1=[]
+        for wR in range(0,wsp.shape[0]-1):
+            line1.append(wsp[wR,0]/w)
+            line1.append(wsp[wR,1]/h)
+
+        if len(classification_input) > classification_input_max_len: #odniesienie do kasyfikacji 480^^^^
+            print(len(classification_input[:classification_input_max_len]))
+            classification_input2 = []
+            classification_input2.append(classification_input[:classification_input_max_len])
+            print(torch.Tensor(classification_input2).size())
+            outputs = model(torch.Tensor(classification_input2))
+            #
+            current_label = labels_map[np.argmax(outputs.detach().numpy())]
+            # tu linijka 1 nawiazanie do tensor.detach().numpy() instead
+            print(outputs.size())
+            classification_input=[]
+            
+
+        classification_input+=line1
+
+        print(line1)
+        print(str(args.out_video_root)+f'/{os.path.basename(args.video_path)}.csv')
+        with open(str(args.out_video_root)+f'/{os.path.basename(args.video_path)}.csv','a') as f:
+            f.writelines(str(line1).strip('[]')+'\n')
+            
+
+        #if args.show and cv2.waitKey(1) & 0xFF == ord('q'):
+        #if args.show and time.sleep(1):
+        #    break
+
+    if save_out_video:
+        videoWriter.release()
+    #if args.show:
+    cv2.destroyAllWindows()
+
+
+if __name__ == '__main__':
+    main()
+    
