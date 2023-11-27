@@ -49,54 +49,74 @@ To change file locations, folder names, files, and videos, you must update them 
 • Controlling the precision of detection and classification by changing the values: Epoch num, batch size.
 
 • You can also control the number of network neurons in the model class for linear layers (except for the values 480 and 7, which remain unchanged, other values can be modified); line: Class Model(nn.Module) self.l1=nn.Linear().
-## good result:
+## Good result:
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/5839592e-35de-4dc5-9c50-d625674eb61f)
-The initial phase of an identified object that has been classified as an activity called “running
+
+The initial phase of an identified object that has been classified as an activity called “running.
+
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/bb4ffbf1-b538-4613-a715-7b9a82ea3a4d)
-Activity classified as a squat from a straight-on and angled camera angle
+
+Activity classified as a squat from a straight-on and angled camera angle.
+
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/d31f6666-8642-48fa-b4f5-f662c0b6c2d3)
+
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/1bfbfc49-2aa7-43bf-98cb-e4b4a17bc924)
 
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/d5027050-f0d2-4992-bde0-25f93c7ad7fe)
+
 Activity classified as "crouching" - bending down to pick up, for example, an object from a distance
-front and side
+front and side.
 
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/e575250e-379f-4c24-a5ab-8f3dcdfcbcf8)
 
-![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/0a2337ac-7eaf-4984-a6ed-bebee6109f72)
-Classified activity: "carrying" a container, as a human-object interaction
-in an angled shot looking from behind
-![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/ea0fca2d-0421-44c7-8e70-2b894cf9b1a6)
-Classified activity: "carrying" a container, as a human-object interaction
-in a side view
+An activity classified as waving (arms) and jumping on one leg (skip).
 
-## examples of detection errors:
+![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/0a2337ac-7eaf-4984-a6ed-bebee6109f72)
+
+Classified activity: "carrying" a container, as a human-object interaction in an angled shot looking from behind.
+
+![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/ea0fca2d-0421-44c7-8e70-2b894cf9b1a6)
+
+Classified activity: "carrying" a container, as a human-object interaction
+in a side view.
+
+## Examples of detection errors:
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/358be2d5-b5ed-4e97-bee2-8600e8668179)
-An example of a video being rejected due to an incorrectly detected pose. Other human-like objects and unnecessary points of the environment were detected
+
+An example of a video being rejected due to an incorrectly detected pose. Other human-like objects and unnecessary points of the environment were detected.
 
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/8dbbd432-8740-49b0-a53d-59163de9fe06)
+
 Example of a rejected video due to a person being mistaken for a human-like object (mannequin)
-and in the figure next to it, a device was additionally detected in the gym
+and in the figure next to it, a device was additionally detected in the gym.
 
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/fa10bd40-bceb-4fde-8612-530338abab5c)
-Example of a rejected video due to double detection of a character. The pose stayed
-identified in the actual place and additionally in the mirror
 
-## test on images in another part of time
+Example of a rejected video due to double detection of a character. The pose stayed
+identified in the actual place and additionally in the mirror.
+
+## test on single film frames at different times (working stage).
+Trials:
+- for one human figure in the frame.
+- for several/large human figures
+- for a clean, smooth background - rosta detection
+- for varied and with many moving elements - more complicated detection - risk of error
+  
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/87c65161-bce5-4d00-899f-2adf6125fa7f)
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/7359178d-3ffd-4afb-b8e5-614127f9d96e)
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/3c273278-b4e7-4ea4-ac29-56f4115113e7)
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/ca7e5d3c-2933-480b-b982-9f955acb1a52)
 
-## graphs
+## Graphs
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/e7e5798e-7c6e-4d30-b617-d57d599fb1ac)
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/f7b6d9f2-9e9f-4f4e-b200-fe0629fd0ec6)
 
-## system result
+## System result
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/1a856386-347a-488d-bd6b-9615ed7bfd43)
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/ca47553c-563d-4438-b8cd-6177f72053bc)
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/0d93acdc-c0c7-4521-ab7c-bda7dcd41c7e)
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/8b6c3df0-fb38-481c-b06f-9d8f02b4475b)
+
 Perfect result of the confusion matrix, the results are only on the diagonal of the square 
 One of the best results of the project showing the classifier confusion matrix
 
