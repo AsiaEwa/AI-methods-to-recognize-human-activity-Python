@@ -95,12 +95,12 @@ and in the figure next to it, a device was additionally detected in the gym.
 Example of a rejected video due to double detection of a character. The pose stayed
 identified in the actual place and additionally in the mirror.
 
-## test on single film frames at different times (working stage).
+## Test on single film frames at different times (working stage)
 Trials:
-- for one human figure in the frame.
-- for several/large human figures
-- for a clean, smooth background - rosta detection
-- for varied and with many moving elements - more complicated detection - risk of error
+- for one human figure in the frame,
+- for several/large human figures,
+- for a clean, smooth background - rosta detection,
+- for varied and with many moving elements - more complicated detection - risk of error.
   
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/87c65161-bce5-4d00-899f-2adf6125fa7f)
 ![image](https://github.com/AsiaEwa/AI-methods-to-recognize-human-activity-Python/assets/101841759/7359178d-3ffd-4afb-b8e5-614127f9d96e)
