@@ -1,0 +1,68 @@
+##!/bin/bash
+
+# 
+export WORK_DIR=$HOME
+cd $WORK_DIR
+
+source vnv3/bin/activate
+
+#to uruchomic
+#./polecenia_uproszczone.sh 
+
+# Wlaczanie programu
+#export CMD_EXEC="$HOME/mmpose/demo/pierwszy-kod.py"
+export CMD_EXEC="$HOME/mmpose/demo/pierwszy-kod.py"
+# Normalizacja
+export CMD_NORMAL="$HOME/mmpose/associative_embedding_hrnet_w32_coco_512x512.py --device=cuda:0"
+# Zapis sieci neuronowej
+export SAVE_AI="$HOME/mmpose/hrnet_w32_coco_512x512-bcb8c247_20200816.pth"
+# Gdzie sa moje przykladowe pliki
+#export FILE_EXMPL_PATH="$HOME/Desktop/nagrania_biuro_gpnt"
+#to zmienne-folder
+export FILE_EXMPL_PATH="$HOME/Desktop/nagrania_biuro_gpnt"
+/home/asia/Desktop/nagrania_biuro
+# Jak sobie poradzic z lista plikow 
+#export EXMPL_NAME="bieganie stanie pajacyki kucanie przysiady street_human_vis_demo"
+#export EXMPL_NAME=`ls $FILE_EXMPL_PATH *.avi`
+#to odkomentowac dla wszystkich np.avi
+export EXMPL_NAME=`cd $FILE_EXMPL_PATH; ls *.avi`
+#to zmienne-poszczegolne filmy
+#ponizsze zakomentowane -do poszczegolnych filmow z pliku UWAGA
+export EXMPL_NAME=`cd $FILE_EXMPL_PATH; ls bieganie.avi`
+# Gdzie sa moje wyniki,  #to zmienne-folder
+export WYNIKI="$HOME/Desktop/wyniki-dyplom"
+
+
+
+# UPROSZCZENIE 
+for example in $EXMPL_NAME
+do
+  python3 $CMD_EXEC $CMD_NORMAL --device=cuda:0 $SAVE_AI --video-path $FILE_EXMPL_PATH/$example --out-video-root $WYNIKI
+done
+
+
+# Brudnopis
+
+# Przykladowa petla
+#for i in {1..10}
+#do
+#  echo "Operacja $i"
+#done
+
+#python3 mmpose/demo/bottom_up_video_demo.py /home/asia/mmpose/associative_embedding_hrnet_w32_coco_512x512.py --device=cuda:0  /home/asia/mmpose/hrnet_w32_coco_512x512-bcb8c247_20200816.pth --video-path /home/asia/Desktop/nagrania_biuro_gpnt/bieganie.avi --out-video-root ~/Desktop/zadania
+
+#python3 mmpose/demo/bottom_up_video_demo.py /home/asia/mmpose/associative_embedding_hrnet_w32_coco_512x512.py --device=cuda:0  /home/asia/mmpose/hrnet_w32_coco_512x512-bcb8c247_20200816.pth --video-path /home/asia/Desktop/nagrania_biuro_gpnt/stanie.avi --out-video-root ~/Desktop/zadania
+
+#python3 mmpose/demo/bottom_up_video_demo.py /home/asia/mmpose/associative_embedding_hrnet_w32_coco_512x512.py --device=cuda:0  /home/asia/mmpose/hrnet_w32_coco_512x512-bcb8c247_20200816.pth --video-path /home/asia/Desktop/nagrania_biuro_gpnt/pajacyki.avi --out-video-root ~/Desktop/zadania
+
+#python3 mmpose/demo/bottom_up_video_demo.py /home/asia/mmpose/associative_embedding_hrnet_w32_coco_512x512.py --device=cuda:0  /home/asia/mmpose/hrnet_w32_coco_512x512-bcb8c247_20200816.pth --video-path /home/asia/Desktop/nagrania_biuro_gpnt/kucanie.avi --out-video-root ~/Desktop/zadania
+
+#python3 mmpose/demo/bottom_up_video_demo.py /home/asia/mmpose/associative_embedding_hrnet_w32_coco_512x512.py --device=cuda:0  /home/asia/mmpose/hrnet_w32_coco_512x512-bcb8c247_20200816.pth --video-path /home/asia/Desktop/nagrania_biuro_gpnt/przysiady.avi --out-video-root ~/Desktop/zadania
+
+#python3 mmpose/demo/bottom_up_video_demo.py /home/asia/mmpose/associative_embedding_hrnet_w32_coco_512x512.py --device=cuda:0  /home/asia/mmpose/hrnet_w32_coco_512x512-bcb8c247_20200816.pth --video-path /home/asia/Desktop/nagrania_biuro_gpnt/street_human_vis_demo.mp4 --out-video-root ~/Desktop/zadania
+
+
+#test obrazka na video nie idzie chyba trzeba do kodu image zrobic operacje
+#python3 mmpose/demo/bottom_up_video_demo.py /home/asia/mmpose/associative_embedding_hrnet_w32_coco_512x512.py --device=cuda:0  /home/asia/mmpose/hrnet_w32_coco_512x512-bcb8c247_20200816.pth --video-path /home/asia/Desktop/nagrania_biuro_gpnt/jumping_jack_open.jpg --out-video-root ~/Desktop/zadania
+
+
